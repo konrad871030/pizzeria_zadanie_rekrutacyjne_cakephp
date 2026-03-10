@@ -19,14 +19,14 @@ class OrdersFixture extends TestFixture
     {
         $this->records = [
             [
-                'biginteger' => 1,
+                'id' => 1,
                 'menu_item_id' => 1,
-                'quantity' => 1,
-                'email' => 'Lorem ipsum dolor sit amet',
-                'delivery_address' => 'Lorem ipsum dolor sit amet',
-                'status' => 'Lorem ipsum dolor ',
+                'quantity' => 2,
+                'email' => 'client@example.com',
+                'delivery_address' => 'Testowa 1, Warszawa',
+                'status' => 'queued',
                 'created_at' => '2026-03-10 13:58:03',
-                'delivered_at' => '2026-03-10 13:58:03',
+                'delivered_at' => null,
             ],
         ];
         parent::init();
