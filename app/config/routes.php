@@ -51,6 +51,7 @@ return function (RouteBuilder $routes): void {
 
     $routes->scope('/', function (RouteBuilder $builder): void {
         $builder->connect('/', ['controller' => 'Frontend', 'action' => 'index']);
+        $builder->connect('/pages/*', 'Pages::display');
         $builder->connect('/queue-stats', ['controller' => 'Frontend', 'action' => 'queueStats']);
 
         /*
