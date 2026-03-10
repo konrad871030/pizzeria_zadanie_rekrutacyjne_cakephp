@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Test\TestCase\Command;
 
 use App\Command\OrdersWorkerCommand;
+use Cake\ORM\Table;
 use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 
@@ -16,47 +17,61 @@ class OrdersWorkerCommandTest extends TestCase
 {
     use ConsoleIntegrationTestTrait;
 
-    /**
-     * Test defaultName method
-     *
-     * @return void
-     * @link \App\Command\OrdersWorkerCommand::defaultName()
-     */
+    protected array $fixtures = [
+        'app.MenuItems',
+        'app.Orders',
+    ];
+
+    protected Table $ordersTable;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->ordersTable = $this->getTableLocator()->get('Orders');
+    }
+
     public function testDefaultName(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->assertSame('orders-worker', OrdersWorkerCommand::defaultName());
     }
 
-    /**
-     * Test getDescription method
-     *
-     * @return void
-     * @link \App\Command\OrdersWorkerCommand::getDescription()
-     */
     public function testGetDescription(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->assertSame(
+            'Ciagla obsluga kolejki zamowien pizzerii.',
+            OrdersWorkerCommand::getDescription()
+        );
     }
 
-    /**
-     * Test buildOptionParser method
-     *
-     * @return void
-     * @link \App\Command\OrdersWorkerCommand::buildOptionParser()
-     */
-    public function testBuildOptionParser(): void
+    public function testExecuteProcessesQueuedOrderInOnceMode(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->exec('orders-worker --once --threshold 999');
+        $this->assertExitSuccess();
+        $this->assertOutputContains('Obsluzono zamowienie #1.');
+
+        /** @var \App\Model\Entity\Order $order */
+        $order = $this->ordersTable->get(1);
+        $this->assertSame('delivered', $order->status);
+        $this->assertNotNull($order->delivered_at);
     }
 
-    /**
-     * Test execute method
-     *
-     * @return void
-     * @link \App\Command\OrdersWorkerCommand::execute()
-     */
-    public function testExecute(): void
+    public function testExecuteOutputsInfoWhenQueueIsEmpty(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        /** @var \App\Model\Entity\Order $order */
+        $order = $this->ordersTable->get(1);
+        $order->status = 'delivered';
+        $order->delivered_at = new \Cake\I18n\DateTime();
+        $this->ordersTable->saveOrFail($order);
+
+        $this->exec('orders-worker --once --threshold 999');
+        $this->assertExitSuccess();
+        $this->assertOutputContains('Brak zamowien do obslugi.');
+    }
+
+    public function testExecuteLogsLongQueueWarningWhenThresholdReached(): void
+    {
+        $this->exec('orders-worker --once --threshold 1');
+        $this->assertExitSuccess();
+        $this->assertErrorContains('Dluga kolejka zamowien: 1 zamowien oczekuje na realizacje.');
     }
 }

@@ -17,7 +17,7 @@ class CreateMenuItemsAndOrders extends AbstractMigration
         }
 
         if (!$this->hasTable('orders')) {
-            $this->table('orders', ['id' => 'biginteger'])
+            $this->table('orders')
                 ->addColumn('menu_item_id', 'integer', ['null' => false])
                 ->addColumn('quantity', 'integer', ['null' => false])
                 ->addColumn('email', 'string', ['limit' => 180, 'null' => false])

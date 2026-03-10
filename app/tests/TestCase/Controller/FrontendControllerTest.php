@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Test\TestCase\Controller;
 
-use App\Controller\FrontendController;
+use Cake\ORM\Table;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 
@@ -22,61 +22,53 @@ class FrontendControllerTest extends TestCase
      * @var array<string>
      */
     protected array $fixtures = [
-        'app.Frontend',
+        'app.MenuItems',
+        'app.Orders',
     ];
 
-    /**
-     * Test index method
-     *
-     * @return void
-     * @link \App\Controller\FrontendController::index()
-     */
+    protected Table $ordersTable;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->ordersTable = $this->getTableLocator()->get('Orders');
+    }
+
     public function testIndex(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->get('/');
+        $this->assertResponseOk();
+        $this->assertResponseContains('Menu');
+        $this->assertResponseContains('Nowe zamowienie');
     }
 
-    /**
-     * Test view method
-     *
-     * @return void
-     * @link \App\Controller\FrontendController::view()
-     */
-    public function testView(): void
+    public function testQueueStats(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->get('/queue-stats');
+        $this->assertResponseOk();
+        $this->assertContentType('application/json');
+        $this->assertResponseContains('"queued_count":1');
+        $this->assertResponseContains('"eta_minutes":10');
     }
 
-    /**
-     * Test add method
-     *
-     * @return void
-     * @link \App\Controller\FrontendController::add()
-     */
-    public function testAdd(): void
+    public function testCreateOrderWithPost(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
-    }
+        $this->enableCsrfToken();
+        $beforeCount = $this->ordersTable->find()->count();
 
-    /**
-     * Test edit method
-     *
-     * @return void
-     * @link \App\Controller\FrontendController::edit()
-     */
-    public function testEdit(): void
-    {
-        $this->markTestIncomplete('Not implemented yet.');
-    }
+        $this->post('/', [
+            'menu_item_id' => 1,
+            'quantity' => 2,
+            'email' => 'integration@test.pl',
+            'delivery_address' => 'Testowa 5, Krakow',
+        ]);
 
-    /**
-     * Test delete method
-     *
-     * @return void
-     * @link \App\Controller\FrontendController::delete()
-     */
-    public function testDelete(): void
-    {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->assertResponseSuccess();
+        $this->assertRedirect('/');
+        $afterCount = $this->ordersTable->find()->count();
+        $this->assertSame($beforeCount + 1, $afterCount);
+
+        $last = $this->ordersTable->find()->orderByDesc('id')->firstOrFail();
+        $this->assertSame('queued', $last->status);
     }
 }

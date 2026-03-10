@@ -68,3 +68,17 @@ Opcjonalne parametry:
 
 - `--interval 600` - interwal petli w sekundach
 - `--threshold 5` - prog "dlugiej kolejki" logowany jako warning
+
+## Testy jednostkowe workera
+
+Uruchomienie testow tylko dla workera:
+
+```bash
+docker compose exec cakephp php vendor/bin/phpunit tests/TestCase/Command/OrdersWorkerCommandTest.php
+```
+
+Uruchomienie calego zestawu testow:
+
+```bash
+docker compose exec cakephp php vendor/bin/phpunit
+```

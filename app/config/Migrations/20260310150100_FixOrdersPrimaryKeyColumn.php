@@ -13,7 +13,7 @@ class FixOrdersPrimaryKeyColumn extends AbstractMigration
 
         $ordersTable = $this->table('orders');
         if ($ordersTable->hasColumn('biginteger') && !$ordersTable->hasColumn('id')) {
-            $this->execute('ALTER TABLE orders CHANGE biginteger id BIGINT AUTO_INCREMENT');
+            $ordersTable->renameColumn('biginteger', 'id')->update();
         }
     }
 
@@ -25,7 +25,7 @@ class FixOrdersPrimaryKeyColumn extends AbstractMigration
 
         $ordersTable = $this->table('orders');
         if ($ordersTable->hasColumn('id') && !$ordersTable->hasColumn('biginteger')) {
-            $this->execute('ALTER TABLE orders CHANGE id biginteger INT AUTO_INCREMENT');
+            $ordersTable->renameColumn('id', 'biginteger')->update();
         }
     }
 }
