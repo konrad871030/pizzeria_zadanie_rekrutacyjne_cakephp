@@ -10,6 +10,7 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: "mysql://my_app:secret@mysql:3306/my_app?encoding=utf8mb4"
+      APP_FULL_BASE_URL: "http://localhost:8765"
     volumes:
       - ./app:/app
     ports:
