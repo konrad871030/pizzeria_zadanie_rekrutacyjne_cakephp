@@ -7,7 +7,7 @@ RUN apt-get update \
         libicu-dev \
         libonig-dev \
         unzip \
-    && docker-php-ext-install intl mbstring \
+    && docker-php-ext-install intl mbstring pdo_mysql \
     && rm -rf /var/lib/apt/lists/*
 
 RUN curl -sS https://getcomposer.org/installer \
